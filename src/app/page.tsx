@@ -13,9 +13,6 @@ import {
 import { Contact } from "@/components/site/Contact";
 import { Footer } from "@/components/site/Footer";
 import { useDemoData } from "@/lib/store";
-import aboutImage from "@/assets/service-maintenance.jpg";
-
-const aboutImgSrc = typeof aboutImage === "string" ? aboutImage : (aboutImage as { src?: string })?.src ?? "";
 
 export default function HomePage() {
   const data = useDemoData();
@@ -26,7 +23,7 @@ export default function HomePage() {
       <Header settings={data.settings} />
       <main>
         <Hero settings={data.settings} />
-        <About settings={data.settings} image={aboutImgSrc} />
+        <About settings={data.settings} image="/assets/service-maintenance.jpg" />
         <Services services={services} />
         <Products products={data.products.filter((p) => p.active)} />
         <Projects projects={data.projects.filter((p) => p.active)} />

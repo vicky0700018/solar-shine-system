@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from "react";
 import { defaultData, type DemoData } from "@/data/defaults";
 
-const DATA_KEY = "sartaj-demo-data-v1";
+const DATA_KEY = "sartaj-demo-data-v3";
 const AUTH_KEY = "sartaj-demo-auth-v1";
 
 export const DEMO_EMAIL = "admin@sartajsolar.in";
@@ -14,6 +14,48 @@ function emit() {
   listeners.forEach((l) => l());
 }
 
+function sanitizeData(data: Partial<DemoData>): DemoData {
+  const merged: DemoData = {
+    settings: {
+      ...defaultData.settings,
+      ...(data.settings || {}),
+      banners: (data.settings?.banners && data.settings.banners.length > 0)
+        ? data.settings.banners.map((b, idx) => ({
+            ...b,
+            image: b.image || defaultData.settings.banners[idx]?.image || "/assets/hero-1.jpg",
+          }))
+        : defaultData.settings.banners,
+    },
+    services: (data.services && data.services.length > 0)
+      ? data.services.map((s, idx) => ({
+          ...s,
+          image: s.image || defaultData.services[idx]?.image || "/assets/hero-1.jpg",
+        }))
+      : defaultData.services,
+    products: (data.products && data.products.length > 0)
+      ? data.products.map((p, idx) => ({
+          ...p,
+          image: p.image || defaultData.products[idx]?.image || "/assets/product-residential.jpg",
+        }))
+      : defaultData.products,
+    projects: (data.projects && data.projects.length > 0)
+      ? data.projects.map((pr, idx) => ({
+          ...pr,
+          image: pr.image || defaultData.projects[idx]?.image || "/assets/hero-1.jpg",
+        }))
+      : defaultData.projects,
+    gallery: (data.gallery && data.gallery.length > 0)
+      ? data.gallery.map((g, idx) => ({
+          ...g,
+          image: g.image || defaultData.gallery[idx]?.image || "/assets/gallery-detail.jpg",
+        }))
+      : defaultData.gallery,
+    testimonials: data.testimonials || defaultData.testimonials,
+    leads: data.leads || defaultData.leads,
+  };
+  return merged;
+}
+
 export function getData(): DemoData {
   if (typeof window === "undefined") return defaultData;
   if (cache) return cache;
@@ -21,7 +63,7 @@ export function getData(): DemoData {
     const raw = window.localStorage.getItem(DATA_KEY);
     if (raw) {
       const parsed = JSON.parse(raw) as Partial<DemoData>;
-      cache = { ...defaultData, ...parsed };
+      cache = sanitizeData(parsed);
     } else {
       cache = defaultData;
       window.localStorage.setItem(DATA_KEY, JSON.stringify(cache));
@@ -94,7 +136,6 @@ export function saveItem(collection: Collection, item: WithId) {
     return { ...data, [collection]: next } as DemoData;
   });
 }
-
 
 export function deleteItem(collection: Collection, id: string) {
   setData((data) => ({
