@@ -85,8 +85,9 @@ export function CrudManager({
         payload[field.name] = raw;
       }
     });
-    payload.id = editing.id || makeId();
-    payload.active = editing.active ?? true;
+    payload["id"] = editing.id || makeId();
+    payload["active"] = editing.active ?? true;
+
     saveItem(collection, payload as { id: string } & Record<string, unknown>);
     setEditing(null);
   };
