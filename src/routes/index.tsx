@@ -1,24 +1,59 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Header } from "@/components/site/Header";
+import { Hero } from "@/components/site/Hero";
+import {
+  About,
+  Gallery,
+  Products,
+  Projects,
+  Services,
+  Testimonials,
+} from "@/components/site/Sections";
+import { Contact } from "@/components/site/Contact";
+import { Footer } from "@/components/site/Footer";
+import { useDemoData } from "@/lib/store";
+import aboutImage from "@/assets/service-maintenance.jpg";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
-  component: Index,
+  head: () => ({
+    meta: [
+      { title: "Sartaj Solar Water System | Solar Water Heaters in Pune" },
+      {
+        name: "description",
+        content:
+          "Solar water heater installation, maintenance and repair for homes, societies and businesses in Pune. Efficient, reliable and eco-friendly hot water systems.",
+      },
+      { property: "og:title", content: "Sartaj Solar Water System | Solar Water Heaters in Pune" },
+      {
+        property: "og:description",
+        content:
+          "Residential and commercial solar water heating solutions in Pune — installation, maintenance, repair and consultation.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
+  component: HomePage,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
+function HomePage() {
+  const data = useDemoData();
+  const services = data.services.filter((s) => s.active);
+
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
+    <div className="bg-background">
+      <Header settings={data.settings} />
+      <main>
+        <Hero settings={data.settings} />
+        <About settings={data.settings} image={aboutImage} />
+        <Services services={services} />
+        <Products products={data.products.filter((p) => p.active)} />
+        <Projects projects={data.projects.filter((p) => p.active)} />
+        <Gallery items={data.gallery.filter((g) => g.active)} />
+        <Testimonials testimonials={data.testimonials.filter((t) => t.active)} />
+        <Contact settings={data.settings} services={services} />
+      </main>
+      <Footer settings={data.settings} services={services} />
     </div>
   );
 }
