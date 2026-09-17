@@ -1,18 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
+"use client";
+
 import { AdminShell } from "@/components/admin/AdminShell";
 import { CrudManager } from "@/components/admin/CrudManager";
 
-export const Route = createFileRoute("/admin/testimonials")({
-  head: () => ({
-    meta: [
-      { title: "Testimonials | Sartaj Solar Water System Admin" },
-      { name: "description", content: "Manage demo customer testimonials." },
-      { property: "og:title", content: "Testimonials | Sartaj Solar Water System Admin" },
-      { property: "og:description", content: "Manage demo customer testimonials." },
-      { name: "robots", content: "noindex" },
-    ],
-  }),
-  component: () => (
+export default function AdminTestimonialsPage() {
+  return (
     <AdminShell>
       <CrudManager
         title="Testimonials"
@@ -32,5 +24,5 @@ export const Route = createFileRoute("/admin/testimonials")({
         ]}
       />
     </AdminShell>
-  ),
-});
+  );
+}

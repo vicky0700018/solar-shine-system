@@ -1,4 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
+"use client";
+
 import { Header } from "@/components/site/Header";
 import { Hero } from "@/components/site/Hero";
 import {
@@ -14,29 +15,9 @@ import { Footer } from "@/components/site/Footer";
 import { useDemoData } from "@/lib/store";
 import aboutImage from "@/assets/service-maintenance.jpg";
 
-export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "Sartaj Solar Water System | Solar Water Heaters in Pune" },
-      {
-        name: "description",
-        content:
-          "Solar water heater installation, maintenance and repair for homes, societies and businesses in Pune. Efficient, reliable and eco-friendly hot water systems.",
-      },
-      { property: "og:title", content: "Sartaj Solar Water System | Solar Water Heaters in Pune" },
-      {
-        property: "og:description",
-        content:
-          "Residential and commercial solar water heating solutions in Pune — installation, maintenance, repair and consultation.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
-  component: HomePage,
-});
+const aboutImgSrc = typeof aboutImage === "string" ? aboutImage : (aboutImage as { src?: string })?.src ?? "";
 
-function HomePage() {
+export default function HomePage() {
   const data = useDemoData();
   const services = data.services.filter((s) => s.active);
 
@@ -45,7 +26,7 @@ function HomePage() {
       <Header settings={data.settings} />
       <main>
         <Hero settings={data.settings} />
-        <About settings={data.settings} image={aboutImage} />
+        <About settings={data.settings} image={aboutImgSrc} />
         <Services services={services} />
         <Products products={data.products.filter((p) => p.active)} />
         <Projects projects={data.projects.filter((p) => p.active)} />

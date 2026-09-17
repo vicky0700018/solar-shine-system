@@ -1,5 +1,8 @@
+"use client";
+
 import { useEffect, useState, type ReactNode } from "react";
-import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import Link from "next/link";
+import { useRouter, usePathname } from "next/navigation";
 import {
   BadgeCheck,
   Boxes,
@@ -28,19 +31,19 @@ const NAV = [
 ] as const;
 
 export function AdminShell({ children }: { children: ReactNode }) {
-  const navigate = useNavigate();
+  const router = useRouter();
+  const pathname = usePathname();
   const data = useDemoData();
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [ready, setReady] = useState(false);
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
     if (!isLoggedIn()) {
-      navigate({ to: "/admin/login" });
+      router.push("/admin/login");
       return;
     }
     setReady(true);
-  }, [navigate]);
+  }, [router]);
 
   useEffect(() => {
     setOpen(false);
@@ -69,22 +72,29 @@ export function AdminShell({ children }: { children: ReactNode }) {
       </div>
 
       <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-        {NAV.map((item) => (
-          <Link
-            key={item.to}
-            to={item.to}
-            activeOptions={{ exact: item.to === "/admin" }}
-            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-ink-foreground/70 transition-colors hover:bg-ink-foreground/10 hover:text-ink-foreground data-[status=active]:bg-primary data-[status=active]:text-primary-foreground"
-          >
-            <item.icon className="h-4 w-4" aria-hidden="true" />
-            {item.label}
-          </Link>
-        ))}
+        {NAV.map((item) => {
+          const isActive =
+            item.to === "/admin" ? pathname === "/admin" : pathname.startsWith(item.to);
+          return (
+            <Link
+              key={item.to}
+              href={item.to}
+              className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                isActive
+                  ? "bg-primary text-primary-foreground"
+                  : "text-ink-foreground/70 hover:bg-ink-foreground/10 hover:text-ink-foreground"
+              }`}
+            >
+              <item.icon className="h-4 w-4" aria-hidden="true" />
+              {item.label}
+            </Link>
+          );
+        })}
       </nav>
 
       <div className="space-y-2 border-t border-ink-foreground/10 p-3">
         <Link
-          to="/"
+          href="/"
           className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-ink-foreground/70 hover:bg-ink-foreground/10"
         >
           <Sun className="h-4 w-4" aria-hidden="true" /> View Website
@@ -93,7 +103,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
           type="button"
           onClick={() => {
             logout();
-            navigate({ to: "/admin/login" });
+            router.push("/admin/login");
           }}
           className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-ink-foreground/70 hover:bg-destructive hover:text-destructive-foreground"
         >

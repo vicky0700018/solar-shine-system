@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import Link from "next/link";
 import { Facebook, Instagram, Linkedin, Mail, MapPin, Phone, Sun } from "lucide-react";
 import type { Service, Settings } from "@/data/defaults";
 
@@ -104,7 +104,7 @@ export function Footer({ settings, services }: { settings: Settings; services: S
             © {new Date().getFullYear()} {settings.businessName}. Demo website.
           </p>
           <Link
-            to="/admin/login"
+            href="/admin/login"
             className="rounded-md border border-ink-foreground/20 px-3 py-1.5 font-semibold text-ink-foreground/80 transition-colors hover:border-primary hover:text-primary"
           >
             Admin Login

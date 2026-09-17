@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, Leaf, ShieldCheck, Zap } from "lucide-react";
 import type { Settings } from "@/data/defaults";

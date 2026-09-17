@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import { Menu, Phone, Sun, X } from "lucide-react";
 import type { Settings } from "@/data/defaults";

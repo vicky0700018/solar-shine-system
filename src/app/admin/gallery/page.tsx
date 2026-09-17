@@ -1,18 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
+"use client";
+
 import { AdminShell } from "@/components/admin/AdminShell";
 import { CrudManager } from "@/components/admin/CrudManager";
 
-export const Route = createFileRoute("/admin/gallery")({
-  head: () => ({
-    meta: [
-      { title: "Gallery | Sartaj Solar Water System Admin" },
-      { name: "description", content: "Manage demo gallery images and categories." },
-      { property: "og:title", content: "Gallery | Sartaj Solar Water System Admin" },
-      { property: "og:description", content: "Manage demo gallery images." },
-      { name: "robots", content: "noindex" },
-    ],
-  }),
-  component: () => (
+export default function AdminGalleryPage() {
+  return (
     <AdminShell>
       <CrudManager
         title="Gallery"
@@ -41,5 +33,5 @@ export const Route = createFileRoute("/admin/gallery")({
         ]}
       />
     </AdminShell>
-  ),
-});
+  );
+}

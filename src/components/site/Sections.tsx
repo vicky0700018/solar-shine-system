@@ -1,3 +1,5 @@
+"use client";
+
 import { useMemo, useState } from "react";
 import { ArrowRight, Check, MapPin, Star } from "lucide-react";
 import { ServiceIcon } from "@/lib/icons";

@@ -1,24 +1,14 @@
+"use client";
+
 import { useEffect, useState, type FormEvent } from "react";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowLeft, Lock, Sun } from "lucide-react";
 import { Button, inputClass } from "@/components/admin/ui";
 import { DEMO_EMAIL, DEMO_PASSWORD, isLoggedIn, login, useDemoData } from "@/lib/store";
 
-export const Route = createFileRoute("/admin/login")({
-  head: () => ({
-    meta: [
-      { title: "Admin Login | Sartaj Solar Water System" },
-      { name: "description", content: "Demo admin panel login for Sartaj Solar Water System." },
-      { property: "og:title", content: "Admin Login | Sartaj Solar Water System" },
-      { property: "og:description", content: "Demo admin panel login." },
-      { name: "robots", content: "noindex" },
-    ],
-  }),
-  component: AdminLogin,
-});
-
-function AdminLogin() {
-  const navigate = useNavigate();
+export default function AdminLoginPage() {
+  const router = useRouter();
   const data = useDemoData();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -26,8 +16,8 @@ function AdminLogin() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (isLoggedIn()) navigate({ to: "/admin" });
-  }, [navigate]);
+    if (isLoggedIn()) router.push("/admin");
+  }, [router]);
 
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();
@@ -35,7 +25,7 @@ function AdminLogin() {
     setLoading(true);
     window.setTimeout(() => {
       if (login(email, password)) {
-        navigate({ to: "/admin" });
+        router.push("/admin");
       } else {
         setError("Invalid demo credentials. Please try again.");
         setLoading(false);
@@ -47,7 +37,7 @@ function AdminLogin() {
     <div className="flex min-h-screen items-center justify-center bg-ink px-4 py-12">
       <div className="w-full max-w-md">
         <Link
-          to="/"
+          href="/"
           className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-ink-foreground/70 hover:text-primary"
         >
           <ArrowLeft className="h-4 w-4" aria-hidden="true" /> Back to website

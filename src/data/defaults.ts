@@ -1,11 +1,28 @@
-import hero1 from "@/assets/hero-1.jpg";
-import hero2 from "@/assets/hero-2.jpg";
-import hero3 from "@/assets/hero-3.jpg";
-import productResidential from "@/assets/product-residential.jpg";
-import productCommercial from "@/assets/product-commercial.jpg";
-import serviceMaintenance from "@/assets/service-maintenance.jpg";
-import galleryDetail from "@/assets/gallery-detail.jpg";
-import projectApartment from "@/assets/project-apartment.jpg";
+import hero1Img from "@/assets/hero-1.jpg";
+import hero2Img from "@/assets/hero-2.jpg";
+import hero3Img from "@/assets/hero-3.jpg";
+import productResidentialImg from "@/assets/product-residential.jpg";
+import productCommercialImg from "@/assets/product-commercial.jpg";
+import serviceMaintenanceImg from "@/assets/service-maintenance.jpg";
+import galleryDetailImg from "@/assets/gallery-detail.jpg";
+import projectApartmentImg from "@/assets/project-apartment.jpg";
+
+const getSrc = (img: unknown): string => {
+  if (typeof img === "string") return img;
+  if (img && typeof img === "object" && "src" in img && typeof (img as { src: unknown }).src === "string") {
+    return (img as { src: string }).src;
+  }
+  return "";
+};
+
+const hero1 = getSrc(hero1Img);
+const hero2 = getSrc(hero2Img);
+const hero3 = getSrc(hero3Img);
+const productResidential = getSrc(productResidentialImg);
+const productCommercial = getSrc(productCommercialImg);
+const serviceMaintenance = getSrc(serviceMaintenanceImg);
+const galleryDetail = getSrc(galleryDetailImg);
+const projectApartment = getSrc(projectApartmentImg);
 
 export const HERO_IMAGES = { hero1, hero2, hero3 };
 
