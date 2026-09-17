@@ -3,13 +3,14 @@ import { Facebook, Instagram, Linkedin, Mail, MapPin, Phone, Sun } from "lucide-
 import type { Service, Settings } from "@/data/defaults";
 
 const QUICK_LINKS = [
-  { label: "Home", href: "#home" },
-  { label: "About", href: "#about" },
-  { label: "Services", href: "#services" },
-  { label: "Products", href: "#products" },
-  { label: "Projects", href: "#projects" },
-  { label: "Gallery", href: "#gallery" },
-  { label: "Contact", href: "#contact" },
+  { label: "Home", href: "/" },
+  { label: "About", href: "/about" },
+  { label: "Services", href: "/services" },
+  { label: "Products", href: "/products" },
+  { label: "Projects", href: "/projects" },
+  { label: "Gallery", href: "/gallery" },
+  { label: "Testimonials", href: "/testimonials" },
+  { label: "Contact", href: "/contact" },
 ];
 
 export function Footer({ settings, services }: { settings: Settings; services: Service[] }) {
@@ -17,12 +18,12 @@ export function Footer({ settings, services }: { settings: Settings; services: S
     <footer className="bg-ink text-ink-foreground">
       <div className="section-shell grid gap-10 py-16 md:grid-cols-2 lg:grid-cols-4">
         <div>
-          <div className="flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-3">
             <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-primary-foreground">
               <Sun className="h-6 w-6" aria-hidden="true" />
             </span>
             <span className="font-display text-base font-extrabold">{settings.businessName}</span>
-          </div>
+          </Link>
           <p className="mt-4 text-sm text-ink-foreground/70">{settings.footerText}</p>
           <div className="mt-5 flex gap-2">
             {[Facebook, Instagram, Linkedin].map((Icon, i) => (
@@ -44,12 +45,12 @@ export function Footer({ settings, services }: { settings: Settings; services: S
           <ul className="mt-4 space-y-2">
             {QUICK_LINKS.map((link) => (
               <li key={link.href}>
-                <a
+                <Link
                   href={link.href}
                   className="text-sm text-ink-foreground/70 transition-colors hover:text-primary"
                 >
                   {link.label}
-                </a>
+                </Link>
               </li>
             ))}
           </ul>
@@ -62,12 +63,12 @@ export function Footer({ settings, services }: { settings: Settings; services: S
           <ul className="mt-4 space-y-2">
             {services.slice(0, 6).map((service) => (
               <li key={service.id}>
-                <a
-                  href="#services"
+                <Link
+                  href="/services"
                   className="text-sm text-ink-foreground/70 transition-colors hover:text-primary"
                 >
                   {service.title}
-                </a>
+                </Link>
               </li>
             ))}
           </ul>

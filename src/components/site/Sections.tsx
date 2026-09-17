@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import { ArrowRight, Check, MapPin, Star } from "lucide-react";
 import { ServiceIcon } from "@/lib/icons";
 import type {
@@ -42,7 +43,7 @@ function Empty({ label }: { label: string }) {
 
 export function About({ settings, image }: { settings: Settings; image: string }) {
   return (
-    <section id="about" className="bg-background py-20 sm:py-24">
+    <section id="about" className="scroll-mt-24 bg-background py-20 sm:py-24">
       <div className="section-shell grid items-center gap-12 lg:grid-cols-2">
         <div className="relative">
           <img
@@ -110,7 +111,7 @@ export function About({ settings, image }: { settings: Settings; image: string }
 
 export function Services({ services }: { services: Service[] }) {
   return (
-    <section id="services" className="bg-muted py-20 sm:py-24">
+    <section id="services" className="scroll-mt-24 bg-muted py-20 sm:py-24">
       <div className="section-shell">
         <SectionHeading
           eyebrow="Our Services"
@@ -139,13 +140,13 @@ export function Services({ services }: { services: Service[] }) {
                 <h3 className="mt-4 font-display text-lg font-bold text-ink">{service.title}</h3>
                 <p className="mt-2 flex-1 text-sm text-muted-foreground">{service.short}</p>
                 <p className="mt-3 text-sm text-muted-foreground/90">{service.description}</p>
-                <a
-                  href="#contact"
+                <Link
+                  href="/contact"
                   className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-secondary transition-colors hover:text-primary"
                 >
                   Request this service
                   <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                </a>
+                </Link>
               </div>
             </article>
           ))}
@@ -157,7 +158,7 @@ export function Services({ services }: { services: Service[] }) {
 
 export function Products({ products }: { products: Product[] }) {
   return (
-    <section id="products" className="bg-background py-20 sm:py-24">
+    <section id="products" className="scroll-mt-24 bg-background py-20 sm:py-24">
       <div className="section-shell">
         <SectionHeading
           eyebrow="Products & Solutions"
@@ -195,12 +196,12 @@ export function Products({ products }: { products: Product[] }) {
                   <span className="rounded-lg bg-muted px-3 py-1.5 text-sm font-bold text-secondary">
                     {product.price}
                   </span>
-                  <a
-                    href="#contact"
+                  <Link
+                    href="/contact"
                     className="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-primary-foreground transition-transform hover:-translate-y-0.5"
                   >
                     Enquire
-                  </a>
+                  </Link>
                 </div>
               </div>
             </article>
@@ -213,7 +214,7 @@ export function Products({ products }: { products: Product[] }) {
 
 export function Projects({ projects }: { projects: Project[] }) {
   return (
-    <section id="projects" className="bg-muted py-20 sm:py-24">
+    <section id="projects" className="scroll-mt-24 bg-muted py-20 sm:py-24">
       <div className="section-shell">
         <SectionHeading
           eyebrow="Projects"
@@ -274,7 +275,7 @@ export function Gallery({ items }: { items: GalleryItem[] }) {
   const filtered = active === "All" ? items : items.filter((i) => i.category === active);
 
   return (
-    <section id="gallery" className="bg-background py-20 sm:py-24">
+    <section id="gallery" className="scroll-mt-24 bg-background py-20 sm:py-24">
       <div className="section-shell">
         <SectionHeading
           eyebrow="Gallery"
@@ -328,7 +329,7 @@ export function Gallery({ items }: { items: GalleryItem[] }) {
 
 export function Testimonials({ testimonials }: { testimonials: Testimonial[] }) {
   return (
-    <section id="testimonials" className="bg-secondary py-20 sm:py-24">
+    <section id="testimonials" className="scroll-mt-24 bg-secondary py-20 sm:py-24">
       <div className="section-shell">
         <div className="mx-auto max-w-2xl text-center">
           <span className="eyebrow">Testimonials</span>

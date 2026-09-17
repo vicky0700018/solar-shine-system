@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { ChevronLeft, ChevronRight, Leaf, ShieldCheck, Zap } from "lucide-react";
 import type { Settings } from "@/data/defaults";
 
@@ -22,7 +23,7 @@ export function Hero({ settings }: { settings: Settings }) {
   const current = banners[index];
 
   return (
-    <section id="home" className="relative isolate min-h-[92vh] overflow-hidden bg-ink pt-20">
+    <section id="home" className="relative isolate min-h-[92vh] overflow-hidden bg-ink pt-20 scroll-mt-24">
       {banners.map((banner, i) => (
         <img
           key={banner.id}
@@ -50,18 +51,18 @@ export function Hero({ settings }: { settings: Settings }) {
           </p>
 
           <div className="mt-8 flex flex-wrap gap-3">
-            <a
-              href="#contact"
+            <Link
+              href="/contact"
               className="rounded-lg bg-primary px-6 py-3.5 text-sm font-bold text-primary-foreground shadow-lift transition-transform hover:-translate-y-0.5"
             >
               Get a Quote
-            </a>
-            <a
-              href="#services"
+            </Link>
+            <Link
+              href="/services"
               className="rounded-lg border border-ink-foreground/30 bg-ink-foreground/10 px-6 py-3.5 text-sm font-bold text-ink-foreground backdrop-blur transition-colors hover:bg-ink-foreground/20"
             >
               Explore Services
-            </a>
+            </Link>
           </div>
 
           <ul className="mt-10 flex flex-wrap gap-x-6 gap-y-3 text-sm font-medium text-ink-foreground/85">

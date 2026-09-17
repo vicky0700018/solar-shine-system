@@ -65,7 +65,7 @@ export function Contact({ settings, services }: { settings: Settings; services: 
     "w-full rounded-lg border border-input bg-background px-3.5 py-3 text-sm text-ink outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring/40";
 
   return (
-    <section id="contact" className="bg-muted py-20 sm:py-24">
+    <section id="contact" className="scroll-mt-24 bg-muted py-20 sm:py-24">
       <div className="section-shell grid gap-10 lg:grid-cols-[minmax(0,0.9fr)_1fr]">
         <div>
           <span className="eyebrow">Contact</span>
