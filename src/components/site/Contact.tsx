@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { CheckCircle2, Mail, MapPin, Phone } from "lucide-react";
+import { CheckCircle2, Mail, MapPin, Phone, AlertCircle } from "lucide-react";
 import type { Service, Settings } from "@/data/defaults";
-import { addLead } from "@/lib/store";
 
 type Errors = Partial<Record<"name" | "phone" | "email" | "service" | "message", string>>;
 
@@ -12,37 +11,54 @@ const EMPTY = { name: "", phone: "", email: "", service: "", message: "" };
 export function Contact({ settings, services }: { settings: Settings; services: Service[] }) {
   const [form, setForm] = useState(EMPTY);
   const [errors, setErrors] = useState<Errors>({});
+  const [serverError, setServerError] = useState("");
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
 
   const update = (key: keyof typeof EMPTY, value: string) => {
     setForm((f) => ({ ...f, [key]: value }));
     setErrors((e) => ({ ...e, [key]: undefined }));
+    setServerError("");
   };
 
   const validate = () => {
     const next: Errors = {};
     if (form.name.trim().length < 2) next.name = "Please enter your full name.";
-    if (!/^[0-9+\-\s]{8,15}$/.test(form.phone.trim()))
+    if (!/^[0-9+\-\s()]{7,20}$/.test(form.phone.trim()))
       next.phone = "Please enter a valid phone number.";
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim()))
       next.email = "Please enter a valid email address.";
     if (!form.service) next.service = "Please choose a service.";
-    if (form.message.trim().length < 10) next.message = "Please add a few more details.";
+    if (form.message.trim().length < 5) next.message = "Please add a few more details.";
     setErrors(next);
     return Object.keys(next).length === 0;
   };
 
-  const onSubmit = (event: FormEvent) => {
+  const onSubmit = async (event: FormEvent) => {
     event.preventDefault();
     if (!validate()) return;
     setSending(true);
-    window.setTimeout(() => {
-      addLead(form);
+    setServerError("");
+
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setSent(true);
+        setForm(EMPTY);
+      } else {
+        setServerError(data.message || "Failed to submit enquiry. Please try again.");
+      }
+    } catch {
+      setServerError("Network connection issue. Please try again or call us directly.");
+    } finally {
       setSending(false);
-      setSent(true);
-      setForm(EMPTY);
-    }, 500);
+    }
   };
 
   const inputClass =
@@ -78,7 +94,7 @@ export function Contact({ settings, services }: { settings: Settings; services: 
                 <span className="block text-sm font-bold text-ink">Phone</span>
                 <a
                   href={`tel:${settings.phone}`}
-                  className="block text-sm text-muted-foreground hover:text-secondary"
+                  className="block text-sm text-muted-foreground hover:text-secondary font-semibold"
                 >
                   {settings.phone}
                 </a>
@@ -92,7 +108,7 @@ export function Contact({ settings, services }: { settings: Settings; services: 
                 <span className="block text-sm font-bold text-ink">Email</span>
                 <a
                   href={`mailto:${settings.email}`}
-                  className="block text-sm text-muted-foreground hover:text-secondary"
+                  className="block text-sm text-muted-foreground hover:text-secondary font-semibold"
                 >
                   {settings.email}
                 </a>
@@ -106,22 +122,28 @@ export function Contact({ settings, services }: { settings: Settings; services: 
             <div className="flex h-full flex-col items-center justify-center py-10 text-center">
               <CheckCircle2 className="h-12 w-12 text-success" aria-hidden="true" />
               <h3 className="mt-4 font-display text-xl font-bold text-ink">
-                Thank you — enquiry received
+                Thank you — enquiry received!
               </h3>
               <p className="mt-2 max-w-sm text-sm text-muted-foreground">
-                Your demo enquiry has been saved and now appears in the admin panel under Contact
-                Leads.
+                Your enquiry has been successfully saved to our database and our solar specialists have been notified. We will reach out shortly.
               </p>
               <button
                 type="button"
                 onClick={() => setSent(false)}
-                className="mt-6 rounded-lg bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground"
+                className="mt-6 rounded-lg bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors"
               >
                 Send another enquiry
               </button>
             </div>
           ) : (
             <form onSubmit={onSubmit} noValidate className="space-y-4">
+              {serverError && (
+                <div className="flex items-center gap-2 rounded-lg bg-destructive/10 p-3 text-xs font-semibold text-destructive">
+                  <AlertCircle className="h-4 w-4 shrink-0" />
+                  <p>{serverError}</p>
+                </div>
+              )}
+
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label htmlFor="name" className="mb-1.5 block text-sm font-semibold text-ink">
@@ -181,7 +203,8 @@ export function Contact({ settings, services }: { settings: Settings; services: 
                       {service.title}
                     </option>
                   ))}
-                  <option value="Other">Other</option>
+                  <option value="Solar Consultation">Solar Consultation</option>
+                  <option value="General Enquiry">General Enquiry</option>
                 </select>
                 {errors.service && (
                   <p className="mt-1 text-xs text-destructive">{errors.service}</p>
@@ -208,13 +231,10 @@ export function Contact({ settings, services }: { settings: Settings; services: 
               <button
                 type="submit"
                 disabled={sending}
-                className="w-full rounded-lg bg-primary px-5 py-3.5 text-sm font-bold text-primary-foreground transition-transform hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70"
+                className="w-full rounded-lg bg-primary px-5 py-3.5 text-sm font-bold text-primary-foreground transition-transform hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70 shadow-sm"
               >
-                {sending ? "Sending…" : "Send Enquiry"}
+                {sending ? "Submitting to Database & Sending Alert…" : "Send Enquiry"}
               </button>
-              <p className="text-center text-xs text-muted-foreground">
-                Demo form — submissions are stored in your browser only.
-              </p>
             </form>
           )}
         </div>

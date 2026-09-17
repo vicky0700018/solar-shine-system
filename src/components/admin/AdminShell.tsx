@@ -17,7 +17,6 @@ import {
   X,
   Building2,
 } from "lucide-react";
-import { isLoggedIn, logout, useDemoData } from "@/lib/store";
 
 const NAV = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -33,26 +32,62 @@ const NAV = [
 export function AdminShell({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const data = useDemoData();
+  const [businessName, setBusinessName] = useState("Sartaj Solar Water System");
   const [ready, setReady] = useState(false);
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    if (!isLoggedIn()) {
-      router.push("/admin/login");
-      return;
+    let isMounted = true;
+    async function checkAuth() {
+      try {
+        const res = await fetch("/api/auth/me");
+        if (!res.ok) {
+          router.push("/admin/login");
+          return;
+        }
+        const data = await res.json();
+        if (!data.authenticated) {
+          router.push("/admin/login");
+          return;
+        }
+        if (isMounted) setReady(true);
+
+        // Fetch settings for business name
+        fetch("/api/settings")
+          .then((r) => r.json())
+          .then((s) => {
+            if (s?.data?.businessName && isMounted) {
+              setBusinessName(s.data.businessName);
+            }
+          })
+          .catch(() => {});
+      } catch {
+        router.push("/admin/login");
+      }
     }
-    setReady(true);
+    checkAuth();
+    return () => {
+      isMounted = false;
+    };
   }, [router]);
 
   useEffect(() => {
     setOpen(false);
   }, [pathname]);
 
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch {
+      // ignore
+    }
+    router.push("/admin/login");
+  };
+
   if (!ready) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-muted">
-        <p className="text-sm text-muted-foreground">Checking admin session…</p>
+        <p className="text-sm font-semibold text-muted-foreground animate-pulse">Checking admin session…</p>
       </div>
     );
   }
@@ -60,14 +95,14 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const sidebar = (
     <div className="flex h-full flex-col">
       <div className="flex items-center gap-3 border-b border-ink-foreground/10 px-5 py-5">
-        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
           <Sun className="h-5 w-5" aria-hidden="true" />
         </span>
         <span className="leading-tight">
           <span className="block font-display text-sm font-extrabold text-ink-foreground">
-            {data.settings.businessName}
+            {businessName}
           </span>
-          <span className="block text-xs text-ink-foreground/60">Demo Admin Panel</span>
+          <span className="block text-xs text-ink-foreground/60">Admin Control Panel</span>
         </span>
       </div>
 
@@ -81,7 +116,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
               href={item.to}
               className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
                 isActive
-                  ? "bg-primary text-primary-foreground"
+                  ? "bg-primary text-primary-foreground font-semibold shadow-sm"
                   : "text-ink-foreground/70 hover:bg-ink-foreground/10 hover:text-ink-foreground"
               }`}
             >
@@ -95,17 +130,14 @@ export function AdminShell({ children }: { children: ReactNode }) {
       <div className="space-y-2 border-t border-ink-foreground/10 p-3">
         <Link
           href="/"
-          className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-ink-foreground/70 hover:bg-ink-foreground/10"
+          className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-ink-foreground/70 hover:bg-ink-foreground/10 hover:text-ink-foreground"
         >
           <Sun className="h-4 w-4" aria-hidden="true" /> View Website
         </Link>
         <button
           type="button"
-          onClick={() => {
-            logout();
-            router.push("/admin/login");
-          }}
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-ink-foreground/70 hover:bg-destructive hover:text-destructive-foreground"
+          onClick={handleLogout}
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-ink-foreground/70 hover:bg-destructive hover:text-destructive-foreground transition-colors"
         >
           <LogOut className="h-4 w-4" aria-hidden="true" /> Logout
         </button>
@@ -149,8 +181,9 @@ export function AdminShell({ children }: { children: ReactNode }) {
             <Menu className="h-5 w-5" />
           </button>
           <p className="text-sm font-semibold text-ink">Admin Panel</p>
-          <span className="ml-auto rounded-md bg-primary-soft px-2.5 py-1 text-xs font-bold text-secondary">
-            Demo Mode
+          <span className="ml-auto rounded-md bg-success-soft px-2.5 py-1 text-xs font-bold text-success flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full bg-success animate-pulse" />
+            Live Connected
           </span>
         </header>
         <main className="p-4 sm:p-6 lg:p-8">{children}</main>

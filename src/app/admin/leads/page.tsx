@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Eye, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Eye, Trash2, Loader2, AlertCircle } from "lucide-react";
 import { AdminShell } from "@/components/admin/AdminShell";
 import {
   Button,
@@ -11,7 +11,6 @@ import {
   Modal,
   PageHeader,
 } from "@/components/admin/ui";
-import { deleteLead, setLeadStatus, useDemoData } from "@/lib/store";
 import type { Lead, LeadStatus } from "@/data/defaults";
 
 const STATUS_STYLES: Record<LeadStatus, string> = {
@@ -21,20 +20,88 @@ const STATUS_STYLES: Record<LeadStatus, string> = {
 };
 
 export default function AdminLeadsPage() {
-  const data = useDemoData();
+  const [leads, setLeads] = useState<Lead[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [filter, setFilter] = useState<"All" | LeadStatus>("All");
   const [viewing, setViewing] = useState<Lead | null>(null);
   const [confirmId, setConfirmId] = useState<string | null>(null);
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
 
-  const leads = filter === "All" ? data.leads : data.leads.filter((l) => l.status === filter);
+  const loadLeads = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch("/api/leads");
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setLeads(data.data || []);
+      } else {
+        setError(data.message || "Failed to fetch leads");
+      }
+    } catch {
+      setError("Network error fetching leads from database");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadLeads();
+  }, []);
+
+  const handleSetStatus = async (id: string, status: LeadStatus) => {
+    try {
+      setUpdatingId(id);
+      const res = await fetch(`/api/leads/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+      if (res.ok) {
+        setLeads((prev) =>
+          prev.map((l) => (l.id === id ? { ...l, status } : l))
+        );
+        if (viewing && viewing.id === id) {
+          setViewing((prev) => (prev ? { ...prev, status } : null));
+        }
+      }
+    } catch {
+      // ignore
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      const res = await fetch(`/api/leads/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setLeads((prev) => prev.filter((l) => l.id !== id));
+      }
+    } catch {
+      loadLeads();
+    } finally {
+      setConfirmId(null);
+    }
+  };
+
+  const filteredLeads =
+    filter === "All" ? leads : leads.filter((l) => l.status === filter);
 
   return (
     <AdminShell>
       <div className="space-y-6">
         <PageHeader
           title="Contact Leads"
-          description="Enquiries submitted through the website contact form (stored in your browser)."
+          description="Customer enquiries submitted through the website contact form, stored live in MongoDB."
         />
+
+        {error && (
+          <div className="flex items-center gap-2 rounded-lg bg-destructive/10 p-4 text-sm font-medium text-destructive">
+            <AlertCircle className="h-4 w-4 shrink-0" />
+            <p>{error}</p>
+          </div>
+        )}
 
         <div className="flex flex-wrap gap-2">
           {(["All", "New", "Contacted", "Closed"] as const).map((status) => (
@@ -44,7 +111,7 @@ export default function AdminLeadsPage() {
               onClick={() => setFilter(status)}
               className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
                 filter === status
-                  ? "bg-secondary text-secondary-foreground"
+                  ? "bg-secondary text-secondary-foreground shadow-sm"
                   : "border border-border bg-background text-ink/70 hover:bg-muted"
               }`}
             >
@@ -53,8 +120,13 @@ export default function AdminLeadsPage() {
           ))}
         </div>
 
-        {leads.length === 0 ? (
-          <EmptyState label="No leads in this view yet. Submit the website contact form to create one." />
+        {loading ? (
+          <Card className="p-12 text-center text-muted-foreground">
+            <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
+            <p className="mt-3 text-sm font-medium">Loading customer leads from database…</p>
+          </Card>
+        ) : filteredLeads.length === 0 ? (
+          <EmptyState label="No leads in this view yet. Submissions from the website contact form appear here." />
         ) : (
           <Card className="overflow-hidden">
             <div className="overflow-x-auto">
@@ -70,7 +142,7 @@ export default function AdminLeadsPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  {leads.map((lead) => (
+                  {filteredLeads.map((lead) => (
                     <tr key={lead.id}>
                       <td className="px-5 py-4 font-semibold text-ink">{lead.name}</td>
                       <td className="px-5 py-4 text-muted-foreground">
@@ -94,21 +166,23 @@ export default function AdminLeadsPage() {
                             type="button"
                             onClick={() => setViewing(lead)}
                             aria-label={`View lead from ${lead.name}`}
-                            className="flex h-9 w-9 items-center justify-center rounded-lg border border-border text-secondary hover:bg-muted"
+                            className="flex h-9 w-9 items-center justify-center rounded-lg border border-border text-secondary hover:bg-muted transition-colors"
                           >
                             <Eye className="h-4 w-4" />
                           </button>
                           <button
                             type="button"
-                            onClick={() => setLeadStatus(lead.id, "Contacted")}
-                            className="rounded-lg border border-border px-3 py-2 text-xs font-bold text-ink hover:bg-muted"
+                            disabled={updatingId === lead.id}
+                            onClick={() => handleSetStatus(lead.id, "Contacted")}
+                            className="rounded-lg border border-border px-3 py-2 text-xs font-bold text-ink hover:bg-muted transition-colors disabled:opacity-50"
                           >
                             Mark Contacted
                           </button>
                           <button
                             type="button"
-                            onClick={() => setLeadStatus(lead.id, "Closed")}
-                            className="rounded-lg border border-border px-3 py-2 text-xs font-bold text-ink hover:bg-muted"
+                            disabled={updatingId === lead.id}
+                            onClick={() => handleSetStatus(lead.id, "Closed")}
+                            className="rounded-lg border border-border px-3 py-2 text-xs font-bold text-ink hover:bg-muted transition-colors disabled:opacity-50"
                           >
                             Mark Closed
                           </button>
@@ -116,7 +190,7 @@ export default function AdminLeadsPage() {
                             type="button"
                             onClick={() => setConfirmId(lead.id)}
                             aria-label={`Delete lead from ${lead.name}`}
-                            className="flex h-9 w-9 items-center justify-center rounded-lg border border-border text-destructive hover:bg-muted"
+                            className="flex h-9 w-9 items-center justify-center rounded-lg border border-border text-destructive hover:bg-muted transition-colors"
                           >
                             <Trash2 className="h-4 w-4" />
                           </button>
@@ -139,39 +213,36 @@ export default function AdminLeadsPage() {
               </p>
               <p>
                 <span className="font-semibold text-ink">Phone:</span>{" "}
-                <span className="text-muted-foreground">{viewing.phone}</span>
+                <span className="text-muted-foreground"><a href={`tel:${viewing.phone}`} className="text-secondary font-semibold hover:underline">{viewing.phone}</a></span>
               </p>
               <p>
                 <span className="font-semibold text-ink">Email:</span>{" "}
-                <span className="text-muted-foreground">{viewing.email}</span>
+                <span className="text-muted-foreground"><a href={`mailto:${viewing.email}`} className="text-secondary font-semibold hover:underline">{viewing.email}</a></span>
               </p>
               <p>
-                <span className="font-semibold text-ink">Service:</span>{" "}
-                <span className="text-muted-foreground">{viewing.service}</span>
+                <span className="font-semibold text-ink">Service Requested:</span>{" "}
+                <span className="text-muted-foreground font-semibold">{viewing.service}</span>
               </p>
               <p>
-                <span className="font-semibold text-ink">Date:</span>{" "}
+                <span className="font-semibold text-ink">Submitted At:</span>{" "}
                 <span className="text-muted-foreground">
                   {new Date(viewing.date).toLocaleString()}
                 </span>
               </p>
               <div>
                 <p className="font-semibold text-ink">Message</p>
-                <p className="mt-1 rounded-lg bg-muted p-3 text-muted-foreground">
-                  {viewing.message}
+                <p className="mt-1 rounded-lg bg-muted p-3 text-muted-foreground whitespace-pre-wrap">
+                  {viewing.message || "No message provided."}
                 </p>
               </div>
-              <div className="flex flex-wrap gap-2 pt-2">
+              <div className="flex flex-wrap gap-2 pt-2 border-t border-border mt-4">
                 {(["New", "Contacted", "Closed"] as const).map((status) => (
                   <Button
                     key={status}
                     variant={viewing.status === status ? "secondary" : "ghost"}
-                    onClick={() => {
-                      setLeadStatus(viewing.id, status);
-                      setViewing({ ...viewing, status });
-                    }}
+                    onClick={() => handleSetStatus(viewing.id, status)}
                   >
-                    {status}
+                    Set as {status}
                   </Button>
                 ))}
               </div>
@@ -182,11 +253,10 @@ export default function AdminLeadsPage() {
         <ConfirmDialog
           open={confirmId !== null}
           title="Delete this lead?"
-          description="The enquiry will be removed from the demo data stored in your browser."
+          description="The enquiry record will be permanently deleted from MongoDB."
           onCancel={() => setConfirmId(null)}
           onConfirm={() => {
-            if (confirmId) deleteLead(confirmId);
-            setConfirmId(null);
+            if (confirmId) handleDelete(confirmId);
           }}
         />
       </div>
