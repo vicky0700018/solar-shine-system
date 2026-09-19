@@ -1,7 +1,7 @@
 import { MongoClient, Db } from "mongodb";
 
 const uri = process.env.MONGODB_URI;
-const DB_NAME = "sartaj_solar";
+const DB_NAME = process.env.MONGODB_DB_NAME || "sartaj_solar";
 
 if (!uri) {
   console.warn("Please define the MONGODB_URI environment variable inside .env");
@@ -38,5 +38,8 @@ export default clientPromise;
 
 export async function getDatabase(): Promise<Db> {
   const client = await clientPromise;
-  return client.db(DB_NAME);
+  if (process.env.MONGODB_DB_NAME) {
+    return client.db(process.env.MONGODB_DB_NAME);
+  }
+  return client.db();
 }
